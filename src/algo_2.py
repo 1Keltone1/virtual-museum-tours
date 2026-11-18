@@ -1,40 +1,39 @@
 def check_graph_connectivity(halls, transition_points):
     if not halls:
-        return True  # Пустой тур считаем связным
+        return True
 
-    # Шаг 1: Строим граф смежности (словарь списков)
+    # 1. Построение графа
     graph = {}
     for hall in halls:
         graph[hall['hall_id']] = []
 
     for point in transition_points:
-        source = point['hall_id']
-        target = point['target_hall_id']
-        if source in graph:
-            graph[source].append(target)
+        if point['hall_id'] in graph:
+            graph[point['hall_id']].append(point['target_hall_id'])
 
-    # Шаг 2: Проверка на "тупики" (если залов больше одного)
+    # 2. Проверка на тупики
     if len(halls) > 1:
         for hall_id, neighbors in graph.items():
             if len(neighbors) == 0:
                 return False
 
-    # Шаг 3: Рекурсивная функция обхода в глубину (DFS)
-    visited = set()
+    # 3. Запускаем обход из каждого зала
+    for start_hall in halls:
+        start_id = start_hall['hall_id']
+        visited = set()
 
-    def dfs(current_hall_id):
-        visited.add(current_hall_id)
-        if current_hall_id in graph:
-            for neighbor in graph[current_hall_id]:
+        def dfs(current_hall_id):
+            visited.add(current_hall_id)
+            for neighbor in graph.get(current_hall_id, []):
                 if neighbor not in visited:
                     dfs(neighbor)
 
-    # Шаг 4: Запускаем обход с первого зала
-    start_hall_id = halls[0]['hall_id']
-    dfs(start_hall_id)
+        dfs(start_id)
 
-    # Шаг 5: Проверяем, что посетили все залы
-    return len(visited) == len(halls)
+        if len(visited) != len(halls):
+            return False
+
+    return True
 
 
 # Блок для запуска из командной строки (демонстрация работы)
