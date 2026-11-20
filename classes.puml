@@ -1,0 +1,216 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 60
+skinparam packageStyle rectangle
+
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #2C3E50
+  ArrowColor #2C3E50
+  HeaderBackgroundColor #E8EEF4
+}
+
+title Диаграмма классов ООП-реализации (КТ3) — 16 классов
+
+' ===== Пакет предметной области =====
+package "Модель предметной области" {
+
+  class Tour {
+    - tourId : long
+    - title : String
+    - status : TourStatus
+    - publishUrl : String
+    - halls : List<Hall>
+    - exhibits : List<Exhibit>
+    + Tour(tourId : long, title : String)
+    + getTourId() : long
+    + getTitle() : String
+    + getStatus() : TourStatus
+    + getPublishUrl() : String
+    + getHalls() : List<Hall>
+    + getExhibits() : List<Exhibit>
+    + addHall(h : Hall) : void
+    + addExhibit(e : Exhibit) : void
+    + markReady() : void
+    + publish() : String
+    + getAllTransitionPoints() : List<TransitionPoint>
+  }
+
+  class Hall {
+    - hallId : long
+    - tour : Tour
+    - name : String
+    - panoramaUrl : String
+    - width : int
+    - height : int
+    - extension : String
+    - points : List<Point>
+    + Hall(hallId : long, tour : Tour, name : String, panoramaUrl : String, width : int, height : int, extension : String)
+    + getHallId() : long
+    + getTour() : Tour
+    + getName() : String
+    + getPanoramaUrl() : String
+    + getWidth() : int
+    + getHeight() : int
+    + getExtension() : String
+    + getPoints() : List<Point>
+    + addPoint(p : Point) : void
+    + hasOutgoingTransitions() : boolean
+    + getTransitionPoints() : List<TransitionPoint>
+    + getExhibitPoints() : List<ExhibitPoint>
+  }
+
+  abstract class Point {
+    # pointId : long
+    # xCoord : double
+    # yCoord : double
+    # hall : Hall
+    # Point(pointId : long, hall : Hall, x : double, y : double)
+    + getPointId() : long
+    + getXCoord() : double
+    + getYCoord() : double
+    + getHall() : Hall
+    + {abstract} getDescription() : String
+  }
+
+  class TransitionPoint {
+    - targetHall : Hall
+    + TransitionPoint(pointId : long, hall : Hall, x : double, y : double, targetHall : Hall)
+    + getTargetHall() : Hall
+    + isSelfLoop() : boolean
+    + getDescription() : String
+  }
+
+  class ExhibitPoint {
+    - exhibit : Exhibit
+    + ExhibitPoint(pointId : long, hall : Hall, x : double, y : double, exhibit : Exhibit)
+    + getExhibit() : Exhibit
+    + openCard() : String
+    + getDescription() : String
+  }
+
+  class Exhibit {
+    - exhibitId : long
+    - tour : Tour
+    - name : String
+    - description : String
+    - mediaLinks : List<ExhibitMedia>
+    + Exhibit(exhibitId : long, tour : Tour, name : String, description : String)
+    + getExhibitId() : long
+    + getTour() : Tour
+    + getName() : String
+    + getDescription() : String
+    + getMediaLinks() : List<ExhibitMedia>
+    + addMedia(file : MediaFile, order : int) : ExhibitMedia
+  }
+
+  class MediaFile {
+    - mediaId : long
+    - fileUrl : String
+    - mediaType : MediaType
+    + MediaFile(mediaId : long, fileUrl : String, mediaType : MediaType)
+    + getMediaId() : long
+    + getFileUrl() : String
+    + getMediaType() : MediaType
+  }
+
+  class ExhibitMedia {
+    - exhibit : Exhibit
+    - media : MediaFile
+    - displayOrder : int
+    + ExhibitMedia(exhibit : Exhibit, media : MediaFile, order : int)
+    + getExhibit() : Exhibit
+    + getMedia() : MediaFile
+    + getDisplayOrder() : int
+  }
+
+  enum TourStatus {
+    DRAFT
+    READY
+    PUBLISHED
+  }
+
+  enum MediaType {
+    AUDIO
+    PHOTO
+    TEXT
+    MODEL_3D
+  }
+}
+
+' ===== Пакет валидаторов =====
+package "Валидаторы (интерфейс и реализации)" {
+
+  interface TourValidator {
+    + validate(tour : Tour) : List<String>
+  }
+
+  class PanoramaFormatValidator {
+    - ALLOWED_EXTENSIONS : Set<String> {static}
+    - ASPECT_TOLERANCE : double {static}
+    + validate(tour : Tour) : List<String>
+  }
+
+  class HotspotLinksValidator {
+    + validate(tour : Tour) : List<String>
+  }
+
+  class GraphConnectivityValidator {
+    - adjacency : Map<Long, List<Long>>
+    - visited : Set<Long>
+    + validate(tour : Tour) : List<String>
+    - buildGraph(tour : Tour) : void
+    - dfs(start : long) : void
+  }
+}
+
+' ===== Технические классы (точка входа и фабрика демо-туров) =====
+package "Технические классы" {
+
+  class Main {
+    + {static} main(args : String[]) : void
+    - {static} runValidation(tour : Tour) : void
+  }
+
+  class DemoTour {
+    + buildCorrect() : Tour
+    + buildBroken() : Tour
+  }
+}
+
+' ===== Наследование =====
+Point <|-- TransitionPoint
+Point <|-- ExhibitPoint
+
+' ===== Реализация интерфейса =====
+TourValidator <|.. PanoramaFormatValidator
+TourValidator <|.. HotspotLinksValidator
+TourValidator <|.. GraphConnectivityValidator
+
+' ===== Композиция (часть не существует без целого).
+' Каждая связь рисуется ОДНОЙ линией: обратная ссылка целевой стороны
+' (Hall.tour, Point.hall, ExhibitMedia.exhibit) видна как атрибут класса
+' и отдельную стрелку не порождает =====
+Tour "1" *-- "N" Hall : содержит
+Hall "1" *-- "N" Point : содержит
+Exhibit "1" *-- "N" ExhibitMedia : содержит
+
+' ===== Агрегация (часть может существовать отдельно) =====
+Tour "1" o-- "N" Exhibit : содержит
+
+' ===== Ассоциации =====
+TransitionPoint "*" --> "1" Hall : ведёт в
+ExhibitPoint "*" --> "1" Exhibit : открывает
+ExhibitMedia "*" --> "1" MediaFile : ссылается на
+
+' ===== Зависимости =====
+TourValidator ..> Tour : проверяет
+Main "1" o-- "3" TourValidator : применяет
+Main ..> Tour : публикует
+Main ..> DemoTour : получает тур
+DemoTour ..> Tour : создаёт
+
+@enduml
