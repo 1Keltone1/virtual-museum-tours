@@ -15,18 +15,36 @@ def validate_panorama_format(panoramas):
 
 
 if __name__ == "__main__":
-    # Тест для проверки формата панорам
-    print("\nЗапуск проверки формата панорам...")
-    test_panoramas = [
-        {'panorama_id': 300L, 'width': 4000, 'height': 2000, 'extension': '.jpg'},
-        {'panorama_id': 301L, 'width': 4096, 'height': 2048, 'extension': '.gif'}, # Ошибка расширения
-        {'panorama_id': 302L, 'width': 1000, 'height': 1000, 'extension': '.gif'}  # Ошибка соотношения
+    print("========== Демо 1: корректный тур ==========")
+    correct_panoramas = [
+        {'panorama_id': 101, 'width': 4096, 'height': 2048, 'extension': '.jpg'},
+        {'panorama_id': 102, 'width': 4096, 'height': 2048, 'extension': '.jpg'},
+        {'panorama_id': 103, 'width': 4096, 'height': 2048, 'extension': '.png'},
     ]
-
-    pan_errors = validate_panorama_format(test_panoramas)
+    print("Проверка формата панорам...")
+    pan_errors = validate_panorama_format(correct_panoramas)
     if pan_errors:
         print(f"Найдено ошибок: {len(pan_errors)}")
         for err in pan_errors:
-            print(f" - {err}")
+            print(f"  - {err}")
+    else:
+        print("Все панорамы корректны.")
+
+    print()
+    print("========== Демо 2: тур с ошибками ==========")
+    
+    broken_panoramas = [
+        {'panorama_id': 301, 'width': 4096, 'height': 2048, 'extension': '.gif'},
+        {'panorama_id': 302, 'width': 1000, 'height': 1000, 'extension': '.jpg'},
+        {'panorama_id': 303, 'width': 4096, 'height': 2048, 'extension': '.jpg'},
+        {'panorama_id': 304, 'width': 4096, 'height': 2048, 'extension': '.jpg'},
+        {'panorama_id': 305, 'width': 4096, 'height': 2048, 'extension': '.jpg'},
+    ]
+    print("Проверка формата панорам...")
+    pan_errors = validate_panorama_format(broken_panoramas)
+    if pan_errors:
+        print(f"Найдено ошибок: {len(pan_errors)}")
+        for err in pan_errors:
+            print(f"  - {err}")
     else:
         print("Все панорамы корректны.")
