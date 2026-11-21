@@ -4,17 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Экспонат музейной коллекции внутри экскурсии.
- *
- * Соответствует сущности «Экспонат» из логической модели КТ2.
- * Принадлежит ровно одной экскурсии (связь Exhibit N --> 1 Tour).
- * Содержит список связанных медиафайлов через ExhibitMedia —
- * связь M:N с MediaFile разрешается ассоциативным классом.
- *
- * Коллекция mediaLinks хранится как List<ExhibitMedia> (не массив),
- * порядок определяется полем displayOrder каждой связи.
- */
+//Экспонат музейной коллекции внутри экскурсии. Соответствует сущности «Экспонат» из логической модели.
+
 public class Exhibit {
 
     private final long exhibitId;
@@ -31,11 +22,7 @@ public class Exhibit {
         this.mediaLinks = new ArrayList<>();
     }
 
-    /**
-     * Создаёт связь с медиафайлом и добавляет её в конец списка.
-     * Возвращает созданную связь, чтобы вызывающий код мог при необходимости
-     * переставить её по displayOrder.
-     */
+    //Создаёт связь с медиафайлом и добавляет её в конец списка.
     public ExhibitMedia addMedia(MediaFile file, int displayOrder) {
         ExhibitMedia link = new ExhibitMedia(this, file, displayOrder);
         mediaLinks.add(link);
@@ -58,7 +45,7 @@ public class Exhibit {
         return description;
     }
 
-    /** Возвращает неизменяемый просмотр списка связей. */
+    //Возвращает список связей для просмотра.
     public List<ExhibitMedia> getMediaLinks() {
         return Collections.unmodifiableList(mediaLinks);
     }
