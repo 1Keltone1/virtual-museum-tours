@@ -18,9 +18,9 @@ if __name__ == "__main__":
     # Тест для проверки формата панорам
     print("\nЗапуск проверки формата панорам...")
     test_panoramas = [
-        {'panorama_id': 1, 'width': 4000, 'height': 2000, 'extension': '.jpg'},
-        {'panorama_id': 2, 'width': 4000, 'height': 3000, 'extension': '.png'}, # Ошибка соотношения
-        {'panorama_id': 3, 'width': 8000, 'height': 4000, 'extension': '.gif'}  # Ошибка расширения
+        {'panorama_id': 300L, 'width': 4000, 'height': 2000, 'extension': '.jpg'},
+        {'panorama_id': 301L, 'width': 4096, 'height': 2048, 'extension': '.gif'}, # Ошибка расширения
+        {'panorama_id': 302L, 'width': 1000, 'height': 1000, 'extension': '.gif'}  # Ошибка соотношения
     ]
 
     pan_errors = validate_panorama_format(test_panoramas)
