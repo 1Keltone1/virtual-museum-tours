@@ -41,24 +41,10 @@ public class Tour {
     }
 
     /**
-     Переводит экскурсию в статус PUBLISHED и формирует уникальную ссылку.
+     Переводит экскурсию в статус PUBLISHED и формирует уникальную ссылку
      (пока простой шаблон на основе идентификатора тура.)
-
-     Сам защищает свои инварианты: тур нельзя отдать на публикацию, пока он не
-     переведён в READY (см. markReady()) и пока в нём нет хотя бы одного зал.
-     Тем самым статус READY реально влияет на публикацию, а Tour не
-     полагается на то, что вызывающий код заранее прогнал валидаторы.
      */
     public String publish() {
-        if (status != TourStatus.READY) {
-            throw new IllegalStateException(
-                    "Невозможно опубликовать тур в статусе " + status
-                            + ": переведите тур в READY через markReady()");
-        }
-        if (halls.isEmpty()) {
-            throw new IllegalStateException(
-                    "Невозможно опубликовать тур без залов");
-        }
         this.status = TourStatus.PUBLISHED;
         this.publishUrl = "https://tours.example.ru/t/" + tourId;
         return publishUrl;

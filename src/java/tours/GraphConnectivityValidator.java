@@ -19,6 +19,12 @@ import java.util.Set;
  */
 public class GraphConnectivityValidator implements TourValidator {
 
+    // Граф смежности.
+    private final Map<Long, List<Long>> adjacency = new HashMap<>();
+
+    // Множество посещённых вершин в текущем обходе.
+    private final Set<Long> visited = new HashSet<>();
+
     @Override
     public List<String> validate(Tour tour) {
         List<String> errors = new ArrayList<>();
@@ -26,10 +32,10 @@ public class GraphConnectivityValidator implements TourValidator {
             return errors;
         }
 
-        // Шаг 1: построение графа смежности (локально, не в поле класса).
-        Map<Long, List<Long>> adjacency = buildGraph(tour);
+        // Шаг 1: построение графа смежности.
+        buildGraph(tour);
 
-        // Шаг 2: проверка на тупики.
+        // Шаг 2: проверка тупиков.
         if (tour.getHalls().size() > 1) {
             for (Hall hall : tour.getHalls()) {
                 if (!hall.hasOutgoingTransitions()) {
@@ -42,7 +48,8 @@ public class GraphConnectivityValidator implements TourValidator {
         // Шаг 3: проверка связности - DFS из каждого зала.
         int totalHalls = tour.getHalls().size();
         for (Hall startHall : tour.getHalls()) {
-            Set<Long> visited = dfs(adjacency, startHall.getHallId());
+            visited.clear();
+            dfs(startHall.getHallId());
             if (visited.size() != totalHalls) {
                 errors.add("Ошибка: Из зала " + startHall.getHallId()
                         + " нельзя попасть во все остальные залы "
@@ -52,33 +59,23 @@ public class GraphConnectivityValidator implements TourValidator {
         return errors;
     }
 
-    /**
-     Заполняет карту смежности по точкам перехода тура.
-     Возвращает новую Map, локальную для текущего вызова validate().
-     */
-    private Map<Long, List<Long>> buildGraph(Tour tour) {
-        Map<Long, List<Long>> adjacency = new HashMap<>();
+    // Заполняет карту смежности по точкам перехода тура.
+    private void buildGraph(Tour tour) {
+        adjacency.clear();
         for (Hall hall : tour.getHalls()) {
             adjacency.put(hall.getHallId(), new ArrayList<>());
         }
         for (TransitionPoint point : tour.getAllTransitionPoints()) {
             long from = point.getHall().getHallId();
-            long to = point.getTargetHall().getHallId();.
+            long to = point.getTargetHall().getHallId();
             if (adjacency.containsKey(to)) {
                 adjacency.get(from).add(to);
             }
         }
-        return adjacency;
     }
 
-    /**
-     Обход в глубину из заданной вершины. Возвращает множество посещённых вершин,
-     локальное для текущего вызова (новое множество на каждый обход).
-     Использует явный стек (Deque) вместо рекурсии: поведение идентично
-     рекурсивному DFS, но безопасно по памяти на больших графах.
-     */
-    private Set<Long> dfs(Map<Long, List<Long>> adjacency, long start) {
-        Set<Long> visited = new HashSet<>();
+    // Обход в глубину из заданной вершины.
+    private void dfs(long start) {
         Deque<Long> stack = new ArrayDeque<>();
         stack.push(start);
         while (!stack.isEmpty()) {
@@ -93,6 +90,5 @@ public class GraphConnectivityValidator implements TourValidator {
                 }
             }
         }
-        return visited;
     }
 }
