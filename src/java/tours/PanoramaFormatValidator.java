@@ -42,11 +42,24 @@ public class PanoramaFormatValidator implements TourValidator {
                         + extension + ")");
                 continue; // некорректное расширение — бессмысленно проверять пропорции
             }
-            double ratio = (double) hall.getWidth() / hall.getHeight();
+            int width = hall.getWidth();
+            int height = hall.getHeight();
+            if (height <= 0) {
+                errors.add("Ошибка: Панорама зала " + hall.getHallId()
+                        + " имеет некорректную высоту (" + height
+                        + "): деление на ноль невозможно");
+                continue;
+            }
+            if (width <= 0) {
+                errors.add("Ошибка: Панорама зала " + hall.getHallId()
+                        + " имеет некорректную ширину (" + width + ")");
+                continue;
+            }
+            double ratio = (double) width / height;
             if (Math.abs(ratio - 2.0) > ASPECT_TOLERANCE) {
                 errors.add("Ошибка: Панорама зала " + hall.getHallId()
                         + " имеет неверное соотношение сторон ("
-                        + hall.getWidth() + "x" + hall.getHeight() + ")");
+                        + width + "x" + height + ")");
             }
         }
         return errors;
