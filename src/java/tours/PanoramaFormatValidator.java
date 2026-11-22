@@ -29,12 +29,18 @@ public class PanoramaFormatValidator implements TourValidator {
     public List<String> validate(Tour tour) {
         List<String> errors = new ArrayList<>();
         for (Hall hall : tour.getHalls()) {
-            String ext = hall.getExtension().toLowerCase();
+            String extension = hall.getExtension();
+            if (extension == null) {
+                errors.add("Ошибка: Панорама зала " + hall.getHallId()
+                        + " имеет пустое расширение (null)");
+                continue; // без расширения проверять пропорции бессмысленно
+            }
+            String ext = extension.toLowerCase();
             if (!ALLOWED_EXTENSIONS.contains(ext)) {
                 errors.add("Ошибка: Панорама зала " + hall.getHallId()
                         + " имеет недопустимое расширение ("
-                        + hall.getExtension() + ")");
-                continue; // некорректное расширение - бессмысленно проверять пропорции
+                        + extension + ")");
+                continue; // некорректное расширение — бессмысленно проверять пропорции
             }
             double ratio = (double) hall.getWidth() / hall.getHeight();
             if (Math.abs(ratio - 2.0) > ASPECT_TOLERANCE) {
